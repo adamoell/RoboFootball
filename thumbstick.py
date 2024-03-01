@@ -23,6 +23,35 @@ class Thumbstick:
         self.y_mid = y_mid
         self.y_max = y_max
         
+    def save_calibration(self):
+        cal = "{}|{}|{}|{}|{}|{}".format(self.x_min, self.x_mid, self.x_max, self.y_min, self.y_mid, self.y_max)
+        with open("calibration.cfg", "w") as f:
+            f.write(cal)
+    
+    def load_calibration(self):
+        try:
+            f = open("calibration.cfg", "r")
+            cal = f.read()
+            items = cal.split("|")
+            if len(items) != 6:
+                print("Invalid calibration.")
+                return False
+            else:
+                self.x_min = int(items[0])
+                self.x_mid = int(items[1])
+                self.x_max = int(items[2])
+                self.y_min = int(items[3])
+                self.y_mid = int(items[4])
+                self.y_max = int(items[5])
+                return True
+        except:
+            return False
+            
+            
+        cal = "{}|{}|{}|{}|{}|{}".format(self.x_min, self.x_mid, self.x_max, self.y_min, self.y_mid, self.y_max)
+        print(cal)
+        
+        
     def handle_button(self, pin):
         # debounce
         
@@ -76,27 +105,27 @@ class Thumbstick:
         
         return ( (x_zone, y_zone*-1) )
     
-    def get_avg_x(self, num):
+    def get_avg(self, num):
+        '''
+        Gets the average value of a given number of samples.
+        Parameters:
+        num: (int) the number of samples to take.
+        '''
         # TODO integrate
-        global x
-        
-        total = 0
+        x_total = 0
+        y_total = 0
         for i in range(0,num):
-            total = total + x.read()
-            time.sleep(0.01)
-            
-        return(int(total/num))
+            (x_val, y_val) = self.read_stick()
 
-    def get_avg_y(self, num):
-        # TODO integrate
-        global y
-        
-        total = 0
-        for i in range(0,num):
-            total = total + y.read()
+            x_total = x_total + x_val
+            y_total = y_total + y_val
             time.sleep(0.01)
             
-        return(int(total/num))
+        x_avg = int(x_total/num)
+        y_avg = int(y_total/num)
+        print(x_avg, y_avg)
+        return( (x_avg, y_avg) )
+
     
     def calibrate_stick(self):
         # TODO safe calibration
