@@ -1,7 +1,7 @@
 '''
 main.py: servo test program
 Copyright (C) 2024 by Adam Oellermann (adam@oellermann.com)
---
+--------------------------------------------------------------------------------
 This file is part of RoboFootball.
 
 RoboFootball is free software: you can redistribute it and/or modify it under
