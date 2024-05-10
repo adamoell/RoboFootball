@@ -1,5 +1,5 @@
 '''
-main.py: servo test program
+servo_test.py: servo test program
 Copyright (C) 2024 by Adam Oellermann (adam@oellermann.com)
 --------------------------------------------------------------------------------
 This file is part of RoboFootball.

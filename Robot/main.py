@@ -1,3 +1,22 @@
+'''
+main.py: main robot program
+Copyright (C) 2024 by Adam Oellermann (adam@oellermann.com)
+--------------------------------------------------------------------------------
+This file is part of RoboFootball.
+
+RoboFootball is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+RoboFootball is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+RoboFootball. If not, see <https://www.gnu.org/licenses/>.
+'''
+
 from motor import Motor, PWMMotor, motor_test, motor_test_quick, random_walk_update
 from time import sleep
 from machine import I2C, Pin
@@ -10,10 +29,9 @@ from rgb import setup_pixels, polis
 left = PWMMotor(14,12, False)
 right = PWMMotor(13,15, False)
 
-print("Hello")
 # go fast
 #machine.freq(160000000)
-machine.freq(80000000)
+#machine.freq(80000000)
 
 
 
