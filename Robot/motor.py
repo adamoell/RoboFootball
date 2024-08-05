@@ -1,5 +1,5 @@
 '''
-motor.py: DRV8833 motor driver library
+motor.py: DRV8833-based motor drivers
 Copyright (C) 2024 by Adam Oellermann (adam@oellermann.com)
 --------------------------------------------------------------------------------
 This file is part of RoboFootball.
@@ -16,7 +16,6 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 RoboFootball. If not, see <https://www.gnu.org/licenses/>.
 '''
-
 from machine import Pin
 from machine import PWM
 from time import sleep
@@ -63,107 +62,6 @@ def randrange(start, stop=None):
 def randint(start, stop):
     return randrange(start, stop + 1)
 
-def random_walk_update(left, right):
-    global lastupdate
-    global duration
-
-    now = ticks_ms()
-
-    if now > lastupdate+duration:
-        randomise(left, right)
-        lastupdate = now 
-
-def randomise(left, right):
-    global duration
-    global lastupdate
-
-    # pick a random duration for this cycle
-    dur = randint(1,3)
-    duration = dur * 1000
-    # pick a random speed for left and right
-    leftspeed = randint(250,1024)
-    rightspeed = randint(250,1024)
-    # pick a random direction for left and right
-    leftdir = randint(0,3) # 0 is backward, 1-3 is forward
-    rightdir = randint(0,3)
-
-    print("Left: {} {} | Right: {} {} for {} seconds".format(leftspeed, leftdir, rightspeed, rightdir, dur))
-    
-    # run
-    left.setspeed(leftspeed)
-    left.setspeed(rightspeed)
-    if leftdir > 0:
-        left.forward()
-    else:
-        left.reverse()
-    if rightdir > 0:
-        right.forward()
-    else:
-        right.reverse()
-
-def motor_test_quick(left, right):
-    left.setspeed(500)
-    right.setspeed(500)
-    
-    print("Forward")
-    left.forward()
-    right.forward()
-    sleep(0.5)
-    left.stop()
-    right.stop()
-    sleep(1)
-
-    left.reverse()
-    right.reverse()
-    sleep(0.5)
-    left.stop()
-    right.stop()
-    sleep(1)
-
-    left.forward()
-    right.reverse()
-    sleep(0.5)
-    left.stop()
-    right.stop()
-    sleep(1)
-
-    left.reverse()
-    right.forward()
-    sleep(0.5)
-    left.stop()
-    right.stop()
-
-def motor_test():
-    global left 
-    global right 
-
-    print("Speed 0")
-    left.setspeed(0)
-    right.setspeed(0)
-    left.forward()
-    right.forward()
-    sleep(2)
-    print("Here we go...")
-    for i in range(400, 1024, 100):
-        print("Speed {}".format(i))
-        left.setspeed(i)
-        right.setspeed(i)
-        sleep(1)
-    sleep(4)
-    print("Reversing")
-    left.reverse()
-    right.reverse()
-    for i in range(1024, 400, -100):
-        print("Speed {}".format(i))
-        left.setspeed(i)
-        right.setspeed(i)
-        sleep(1)
-    sleep(4)
-    print("Resting")
-    left.stop()
-    right.stop()
-    sleep(5)
-    
 class Motor:
     def __init__(self, pin1, pin2, inverted=False):
         self.inverted = inverted
@@ -191,6 +89,7 @@ class Motor:
             self.motora.value(0)
             self.motorb.value(1)
 
+
 class PWMMotor(Motor):
     def __init__(self, pin1, pin2, inverted):
         self.pin1 = pin1
@@ -204,6 +103,7 @@ class PWMMotor(Motor):
         self.inverted = inverted
         self.stop()
 
+    # TODO change thist so we set speed and direction in one, with a val from -255 to 255
     def setspeed(self, speed):
         #print("Setting speed to {}".format(speed))
         # store speed
@@ -258,3 +158,4 @@ class PWMMotor(Motor):
             self.pwm1.deinit()
             self.pwm1 = None
         self.motora.value(0)
+

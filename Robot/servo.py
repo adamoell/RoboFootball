@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with
 RoboFootball. If not, see <https://www.gnu.org/licenses/>.
 '''
 from machine import Pin, PWM
+from time import sleep
 
 class Servo:
     def __init__(self, pin, pwm_freq):
@@ -30,6 +31,7 @@ class Servo:
         max_angle: the maximum angle for the servo (180°)
         pwm_freq: the PWM frequency for the servo (50Hz)
         '''
+        self.pwm_freq = pwm_freq
         self.current_duty = None
         self.calibrated = False
         self.servo_pin = pin
@@ -48,7 +50,7 @@ class Servo:
         '''
         min_duty = round(min_duty_spec * 1024) # 1024 is the duty cycle range of the ESP
         max_duty = round(max_duty_spec * 1024)
-        print("Autocalibration: min_duty={} max_duty={}".format(min_duty, max_duty))
+        #print("Autocalibration: min_duty={} max_duty={}".format(min_duty, max_duty))
         self.calibrate(min_duty, max_duty, min_angle, max_angle)
         
     def calibrate(self, min_duty, max_duty, min_angle, max_angle):
@@ -89,7 +91,29 @@ class Servo:
         duty: the duty cycle to send to the servo.
         '''
         if duty != self.current_duty:
+            self.servo.freq(self.pwm_freq)
             self.current_duty = duty
             self.servo.duty(duty)
 
         
+class Kicker():
+    def __init__(self, pin, freq, rest_angle, kick_angle):
+        self.servo = Servo(pin, pwm_freq=freq)
+        self.rest_angle = rest_angle
+        self.kick_angle = kick_angle
+        sg90_min_duty = 0.025 # 2.5% duty cycle for 0° (according to spec)
+        sg90_max_duty = 0.125 # 12.5% duty cycle for 180° (according to spec)
+        self.servo.auto_calibrate(sg90_min_duty, sg90_max_duty, 0, 180)
+        self.down()
+
+    def up(self):
+        self.servo.goto(self.kick_angle)
+    
+    def down(self):
+        self.servo.goto(self.rest_angle)
+        
+    def kick(self):
+        print(self.servo.servo)
+        self.up()
+        sleep(0.1)
+        self.down()

@@ -1,5 +1,5 @@
 '''
-thumbstick.py: code to read analogue thumbstick
+thumbstick.py: dual-analogue thumbstick library
 Copyright (C) 2024 by Adam Oellermann (adam@oellermann.com)
 --------------------------------------------------------------------------------
 This file is part of RoboFootball.
@@ -16,18 +16,31 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 RoboFootball. If not, see <https://www.gnu.org/licenses/>.
 '''
-
 import machine
 import time
+
+JOY_BTN_DEBOUNCE = 300
+JOY_X_DEBOUNCE = 300
+JOY_Y_DEBOUNCE = 300
 
 class Thumbstick:
 
     def __init__(self, x_pin, y_pin, btn_pin, btn_callback, x_zones=9, y_zones=9):
         self.x = machine.ADC(machine.Pin(x_pin))
         self.y = machine.ADC(machine.Pin(y_pin))
+        # set ADC bit width
+        self.x.width(machine.ADC.WIDTH_12BIT)
+        self.y.width(machine.ADC.WIDTH_12BIT)
+        # set attenuation so we don't need the resistor
+        self.x.atten(machine.ADC.ATTN_11DB)
+        self.y.atten(machine.ADC.ATTN_11DB)
         self.btn = machine.Pin(btn_pin, machine.Pin.IN, machine.Pin.PULL_UP)
-        self.btn_callback = btn_callback
-        self.btn.irq(trigger=machine.Pin.IRQ_FALLING, handler=self.handle_button)
+        # register button callback if specified
+        if not btn_callback is None:
+            self.btn_callback = btn_callback
+            self.btn.irq(trigger=machine.Pin.IRQ_FALLING, handler=self.handle_button)
+        else:
+            self.btn_callback = None
         self.last_btn = time.ticks_ms()
         self.btn_debounce = 250
         self.x_zones = x_zones
@@ -70,6 +83,47 @@ class Thumbstick:
         print(cal)
         
         
+    def test(self, disp):
+        """Test joystick, display outputs until button clicked."""
+        disp.clearscreen()
+        time.sleep(0.25)
+        print(self.btn.value())
+        oldlines = None
+        l1 = "Joy Test |"
+        l2 = "Move joy |"
+        l3 = "Btn exit |"
+        while self.btn.value() != 0:
+            (x_val, y_val) = self.read_zone()
+            if (x_val == -1) and (y_val == 1):
+                lines = ["\\  ", " * ", "   "];
+            elif (x_val == 0) and (y_val == 1):
+                lines = [" | ", " * ", "   "];
+            elif (x_val == 1) and (y_val == 1):
+                lines = ["  /", " * ", "   "];
+            elif (x_val == -1) and (y_val == 0):
+                lines = ["   ", "-* ", "   "];
+            elif (x_val == 0) and (y_val == 0):
+                lines = ["   ", " * ", "   "];
+            elif (x_val == 1) and (y_val == 0):
+                lines = ["   ", " *-", "   "];
+            elif (x_val == -1) and (y_val == -1):
+                lines = ["   ", " * ", "/  "];
+            elif (x_val == 0) and (y_val == -1):
+                lines = ["   ", " * ", " | "];
+            elif (x_val == 1) and (y_val == -1):
+                lines = ["   ", " * ", "  \\"]
+            else:
+                lines = ["Joystick out of range."]
+            if len(lines) == 3:
+                lines[0] = l1 + lines[0] + "|"
+                lines[1] = l2 + lines[1] + "|"
+                lines[2] = l3 + lines[2] + "|"
+            if oldlines != lines:
+                disp.clearscreen()
+                disp.showtext(lines)
+                oldlines = lines
+            time.sleep(0.1)
+        
     def handle_button(self, pin):
         # debounce
         
@@ -79,12 +133,24 @@ class Thumbstick:
             self.btn_callback()
             self.last_btn = time.ticks_ms()
             
+    def wait_for_button(self):
+        # wait for button to be off
+        while self.btn.value() == 0:
+            time.sleep(0.1)
+        while True:
+            if self.btn.value() == 0:
+                return()
+            
+    def read_button(self):
+        return(self.btn.value())
+    
     def read_stick(self):
         '''
         Read the analogue value of X and Y axes on the stick
         (0-4095 on an ESP32)
         '''
         return( (self.x.read(), self.y.read()) )
+        #return( (self.x.read_uv(), self.y.read_uv()) )
     
     def read_zone(self):
         (x_val, y_val) = self.read_stick()
@@ -148,23 +214,43 @@ class Thumbstick:
     def calibrate_stick(self):
         # TODO safe calibration
         # TODO load calibration on init
-        global x_min, x_mid, x_max
         
         input("Hold stick fully left and press Enter")
-        x_min = get_avg_x(100)
+        (self.x_min, z) = self.get_avg(100)
         input("Center stick and press Enter")
-        x_mid = get_avg_x(100)
+        (self.x_mid, z) = self.get_avg(100)
         input("Hold stick fully right and press Enter")
-        x_max = get_avg_x(100)
+        (self.x_max, z) = self.get_avg(100)
         
         input("Hold stick fully up and press Enter")
-        y_min = get_avg_y(100)
+        (z, self.y_min) = self.get_avg(100)
         input("Center stick and press Enter")
-        y_mid = get_avg_y(100)
+        (z, self.y_mid) = self.get_avg(100)
         input("Hold stick fully down and press Enter")
-        y_max = get_avg_y(100)
+        (z, self.y_max) = self.get_avg(100)
         
         print("X Calibration:")
-        print("<<{}<< ||{}|| >>{}>>".format(x_min, x_mid, x_max))
+        print("<<{}<< ||{}|| >>{}>>".format(self.x_min, self.x_mid, self.x_max))
         print("Y Calibration:")
-        print("<<{}<< ||{}|| >>{}>>".format(y_min, y_mid, y_max))
+        print("<<{}<< ||{}|| >>{}>>".format(self.y_min, self.y_mid, self.y_max))
+
+    def select(self, menu_display):
+        last_btn = time.ticks_ms()
+        last_x = time.ticks_ms()
+        last_y = time.ticks_ms()
+        
+        menu_display.show()
+        while True:
+            (x_val, y_val) = self.read_zone()
+            if (y_val != 0) and (time.ticks_diff(time.ticks_ms(), last_y) > JOY_Y_DEBOUNCE):
+                if y_val == 1:
+                    menu_display.up()
+                if y_val == -1:
+                    menu_display.down()
+                last_y = time.ticks_ms()
+                
+            btn = self.read_button()
+            if (btn == 0):
+                if time.ticks_diff(time.ticks_ms(), last_btn) > JOY_BTN_DEBOUNCE:
+                    return( (menu_display.selected, menu_display.items[menu_display.selected]) )
+                last_btn = time.ticks_ms()
