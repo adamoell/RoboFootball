@@ -125,8 +125,8 @@ main_menu_items = [
     "Drive",
     "Set Colour",
     "Cal Motors",
-    "Cal Joystick",
-    "Test Joystick",
+    "Cal Joy",
+    "Test Joy",
     "Ping Bot",
     "Kicker",
     "Reaction Game",
@@ -167,18 +167,12 @@ colour_rgb_values = {
     "White": (255,255,255),
     "Black": (0,0,0)
 }
-map_menu_items = [
-    "Basic",
-    "Standard",
-    "Twitchy"
-]
 
 
 main_menu = MenuDisplay(disp, main_menu_items, selected=0, offset=0, num_lines=3, num_cols=16)
 colour_menu = MenuDisplay(disp, colour_menu_items, selected=0, offset=0, num_lines=3, num_cols=16)
 kicker_menu = MenuDisplay(disp, kicker_menu_items, selected=0, offset=0, num_lines=3, num_cols=16)
 game_menu = MenuDisplay(disp, game_menu_items, selected=0, offset=0, num_lines=3, num_cols=16)
-map_menu = MenuDisplay(disp, map_menu_items, selected=0, offset=0, num_lines=3, num_cols=16)
 
 
 if not joy.load_calibration():
@@ -208,15 +202,13 @@ while True:
         com.send(ROBOT_MAC, msg)
     elif selected_name == "Cal Motors":
         drive.calibrate_motors(joy, disp, cfg, com)    
-    elif selected_name == "Cal Joystick":
+    elif selected_name == "Cal Joy":
         # TODO
-        (id, sel_map) = joy.select(map_menu)        
-        cfg.setval("JOY_MAP", sel_map)
-        cfg.save()
+        fn = "Cal Joystick"
         disp.clearscreen()
-        disp.showtext(["Set joystick to", sel_map, "Btn to exit"])
+        disp.showtext([fn, "--TODO--", "Btn to exit"])
         joy.wait_for_button()
-    elif selected_name == "Test Joystick":    
+    elif selected_name == "Test Joy":    
         joy.test(disp)
     elif selected_name == "Ping Bot":
         ping_start = time.ticks_ms()

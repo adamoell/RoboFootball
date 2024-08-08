@@ -46,10 +46,6 @@ class Thumbstick:
         self.x_zones = x_zones
         self.y_zones = y_zones
         
-    def rezone(self, x_zones, y_zones):
-        self.x_zones = x_zones
-        self.y_zones = y_zones
-        
     def set_calibration(self, x_min, x_mid, x_max, y_min, y_mid, y_max):
         self.x_min = x_min
         self.x_mid = x_mid
@@ -211,6 +207,7 @@ class Thumbstick:
             
         x_avg = int(x_total/num)
         y_avg = int(y_total/num)
+        print(x_avg, y_avg)
         return( (x_avg, y_avg) )
 
     

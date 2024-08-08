@@ -72,21 +72,6 @@ def drive(joy, disp, cfg, com):
     REVERSER_R = int(cfg.get("REVERSER_R", default="1"))
     ROBOT_MAC = cfg.get("ROBOT_MAC")
     
-    map_name = cfg.get("JOY_MAP", default="simple_map")
-    print("Using map: {}".format(map_name))
-    if map_name == "Basic":
-        drive_map = simple_map
-    elif map_name == "Standard":
-        drive_map = default_map
-    elif map_name == "Twitchy":
-        drive_map = twitchy_map
-    else:
-        drive_map = simple_map
-    
-    #drive_map = simple_map
-    #drive_map = twitchy_map
-    (xz, yz) = drive_map["zones"]
-    joy.rezone(x_zones=xz, y_zones=yz)
     last_x = 0
     last_y = 0
     last_btn = time.ticks_ms()
@@ -100,13 +85,13 @@ def drive(joy, disp, cfg, com):
             com.send(ROBOT_MAC, msg)
             last_btn = time.ticks_ms()
         if last_x != x or last_y != y:
-            #print("update: {}|{}".format(x, y))
+            print("update: {}|{}".format(x, y))
             last_x = x
             last_y = y
             
-            (speed_l, speed_r) = drive_map[(x,y)]
-
-            #print("speed: {}|{}".format(speed_l, speed_r))
+            #(speed_l, speed_r) = default_map[(x,y)]
+            (speed_l, speed_r) = simple_map[(x,y)]
+            print("speed: {}|{}".format(speed_l, speed_r))
             
             msg = "S|{}|{}".format(speed_l*REVERSER_L, speed_r*REVERSER_R)
             com.send(ROBOT_MAC, msg)

@@ -43,7 +43,9 @@ MOTOR_RIGHT_REVERSE = True
 KICKER_PIN = 5
 KICKER_FREQ = 50
 KICKER_REST_ANGLE = 180 # servo mounted to right facing forward
-KICKER_KICK_ANGLE = 90  
+KICKER_KICK_ANGLE = 90
+
+# RGB_PIN = 2
        
 def recv_msg(sender, msg):
     """Processes and actions controller message received by ESP_NOW.
