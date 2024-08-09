@@ -214,28 +214,68 @@ class Thumbstick:
         return( (x_avg, y_avg) )
 
     
-    def calibrate_stick(self):
+    def calibrate_stick(self, disp):
         # TODO safe calibration
         # TODO load calibration on init
         
-        input("Hold stick fully left and press Enter")
+        self.rezone(3, 3)
+        
+        disp.clearscreen()
+        disp.showtext(["Hold stick", "fully left <", ""])
+        (x,y) = self.read_zone()
+        print(x,y)
+        while (x!=-1) or (y!=0):
+            time.sleep(0.1)
+            (x,y) = self.read_zone()
+        disp.showtext(["Hold stick", "fully left <", "..."])
+        time.sleep(1)
         (self.x_min, z) = self.get_avg(100)
-        input("Center stick and press Enter")
-        (self.x_mid, z) = self.get_avg(100)
-        input("Hold stick fully right and press Enter")
+        print("x_min: {}".format(self.x_min))
+        
+        disp.clearscreen()
+        disp.showtext(["Hold stick", "centred", ""])
+        (x,y) = self.read_zone()
+        while (x!=0) or (y!=0):
+            time.sleep(0.1)
+            (x,y) = self.read_zone()
+        disp.showtext(["Hold stick", "centred", "..."])
+        time.sleep(1)
+        (self.x_mid, self.y_mid) = self.get_avg(100)
+        print("x_mid: {} y_mid: {}".format(self.x_mid, self.y_mid))
+        
+        disp.clearscreen()
+        disp.showtext(["Hold stick", "fully right >", ""])
+        (x,y) = self.read_zone()
+        while (x!=1) or (y!=0):
+            time.sleep(0.1)
+            (x,y) = self.read_zone()
+        disp.showtext(["Hold stick", "fully right >", "..."])
+        time.sleep(1)
         (self.x_max, z) = self.get_avg(100)
+        print("x_max: {}".format(self.x_max))
+
         
-        input("Hold stick fully up and press Enter")
+        disp.clearscreen()
+        disp.showtext(["Hold stick", "fully fwd", ""])
+        (x,y) = self.read_zone()
+        while (x!=0) or (y!=1):
+            time.sleep(0.1)
+            (x,y) = self.read_zone()
+        disp.showtext(["Hold stick", "fully fwd", "..."])
+        time.sleep(1)
         (z, self.y_min) = self.get_avg(100)
-        input("Center stick and press Enter")
-        (z, self.y_mid) = self.get_avg(100)
-        input("Hold stick fully down and press Enter")
-        (z, self.y_max) = self.get_avg(100)
+        print("y_min: {}".format(self.y_min))
         
-        print("X Calibration:")
-        print("<<{}<< ||{}|| >>{}>>".format(self.x_min, self.x_mid, self.x_max))
-        print("Y Calibration:")
-        print("<<{}<< ||{}|| >>{}>>".format(self.y_min, self.y_mid, self.y_max))
+        disp.clearscreen()
+        disp.showtext(["Hold stick", "fully back", ""])
+        (x,y) = self.read_zone()
+        while (x!=0) or (y!=-1):
+            time.sleep(0.1)
+            (x,y) = self.read_zone()
+        disp.showtext(["Hold stick", "fully back", "..."])
+        time.sleep(1)
+        (z, self.y_max) = self.get_avg(100)
+        print("y_max: {}".format(self.y_max))
 
     def select(self, menu_display):
         last_btn = time.ticks_ms()

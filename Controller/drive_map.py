@@ -18,6 +18,23 @@ simple_map = {
     (1,-1): (-FAST,-SLOW)
 }
 
+PSLOW = 80
+PFAST = 110
+
+precision_map = {
+    "zones": (3,3),
+    (-1,1): (PSLOW,PFAST),
+    (0,1): (PFAST,PFAST),
+    (1,1): (PFAST,PSLOW),
+    
+    (-1,0): (-PSLOW,PSLOW),
+    (0,0): (STOP,STOP),
+    (1,0): (PSLOW,-PSLOW),
+    
+    (-1,-1): (-PSLOW,-PFAST),
+    (0,-1): (-PFAST,-PFAST),
+    (1,-1): (-PFAST,-PSLOW)
+}
 
 
 default_map = {

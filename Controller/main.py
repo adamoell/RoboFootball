@@ -126,6 +126,7 @@ main_menu_items = [
     "Set Colour",
     "Cal Motors",
     "Cal Joystick",
+    "Joystick Mode",
     "Test Joystick",
     "Ping Bot",
     "Kicker",
@@ -170,7 +171,8 @@ colour_rgb_values = {
 map_menu_items = [
     "Basic",
     "Standard",
-    "Twitchy"
+    "Twitchy",
+    "Precision"
 ]
 
 
@@ -209,6 +211,9 @@ while True:
     elif selected_name == "Cal Motors":
         drive.calibrate_motors(joy, disp, cfg, com)    
     elif selected_name == "Cal Joystick":
+        joy.calibrate_stick(disp)
+        joy.save_calibration()
+    elif selected_name == "Joystick Mode":
         # TODO
         (id, sel_map) = joy.select(map_menu)        
         cfg.setval("JOY_MAP", sel_map)

@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License along with
 RoboFootball. If not, see <https://www.gnu.org/licenses/>.
 '''
 import time
-from drive_map import default_map, simple_map
+from drive_map import *
 
 JOY_BTN_DEBOUNCE = 300
 JOY_X_DEBOUNCE = 300
@@ -80,6 +80,8 @@ def drive(joy, disp, cfg, com):
         drive_map = default_map
     elif map_name == "Twitchy":
         drive_map = twitchy_map
+    elif map_name == "Precision":
+        drive_map = precision_map
     else:
         drive_map = simple_map
     
